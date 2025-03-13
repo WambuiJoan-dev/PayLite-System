@@ -9,3 +9,19 @@ class Customer(Base):
     name = Column(String())
     national_id = Column(Integer())
     credit_status = Column(String())
+
+class Phone(Base):
+    __tablename__ = 'phones'
+    id = Column(Integer(Primary_key=True))
+    brand = Column(String())
+    model = Column(String())
+    price = Column(Integer())
+    stock_quantity = Column(Integer())
+
+class Payment(Base):
+    __tablename__ = 'payments'
+    id = Column(Integer(Primary_key=True))
+
+class Sale(Base):
+    __tablename__ = 'sales'
+    
