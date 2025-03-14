@@ -1,23 +1,31 @@
-from sqlalchemy import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey
-from sqlalchemy import DateTime, relationship
+from sqlalchemy.orm import declarative_base
+from sqlalchemy import Column, Integer, String, ForeignKey, create_engine, DateTime
+from sqlalchemy.orm import relationship, sessionmaker
+from datetime import datetime 
 
-Base = declarative_base
 
-class Customer(Base):
+# paylite = 'sqlite.///PayLite.db'
+
+Base = declarative_base()
+# engine = create_engine(paylite)
+# PayLite_engine = create_engine("sqlite:///PayLite.db")
+
+
+
+#one to many r/ship with sales
+class Customer(Base):    
     __tablename__ = 'customers'
 
-    #one to many r/ship with sales
-    id = Column(Integer(), Primary_key=True)
+    id = Column(Integer(), primary_key=True)
     name = Column(String())
     national_id = Column(Integer())
     credit_status = Column(String())
 
-    sales = relationship("Sale", backref="customer")
+    sales = relationship("Sale", back_populates="customer")
 
 class Phone(Base):
     __tablename__ = 'phones'
-    id = Column(Integer(), Primary_key=True)
+    id = Column(Integer(), primary_key=True)
     brand = Column(String())
     model = Column(String())
     price = Column(Integer())
@@ -25,23 +33,38 @@ class Phone(Base):
 
 class Payment(Base):
     __tablename__ = 'payments'
-    id = Column(Integer(), Primary_key=True)
-    sale_id = Column(Integer(), ForeignKey('sale.id'))
+    id = Column(Integer(), primary_key=True)
     amount_paid = Column(Integer())
-    date_paid = Column(Integer())
-    next_due_date = Column(Integer())
- 
-class Sale(Base):
-    __tablename__ = 'sales'
+    date_paid = Column(DateTime(), default=datetime.utcnow)
+    next_due_date = Column(DateTime())
 
-    #one to many(payments)
+    sale_id = Column(Integer(), ForeignKey('sales.id'), nullable=False)
+    sale = relationship("Sale", back_populates="payments")
+ 
+
+ #one to many r/ship with payments
+class Sale(Base):    
+    __tablename__ = 'sales' 
+
+    id = Column(Integer(), primary_key=True)
     total_price = Column(Integer())
     deposit_paid = Column(Integer())
     balance_due = Column(Integer())
     installment_amount = Column(Integer())
     status = Column(String())
 
-    customer_id = Column(Integer(), ForeignKey('customer.id'))
-    phone_id = Column(Integer(), ForeignKey('phone.id'))
+    customer_id = Column(Integer(), ForeignKey('customers.id'))
+    phone_id = Column(Integer(), ForeignKey('phones.id'))
 
-    payments = relationship("Payment", backref="payment")
+    payments = relationship("Payment", back_populates="sales", cascade="all, delete-orphan")
+    customer = relationship("Customer", back_populates="sales")
+    phone = relationship("Phone", back_populates="sales")
+
+
+
+PayLite_engine = create_engine("sqlite:///PayLite.db")
+Base.metadata.create_all(PayLite_engine)
+
+
+Session = sessionmaker(bind=PayLite_engine)
+session = Session()    
