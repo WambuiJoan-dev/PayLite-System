@@ -1,137 +1,189 @@
-import os
-from sqlalchemy.orm import sessionmaker
-from models import Base, Customer, Phone, Payment, Sale, PayLite_engine
+from models import Base, Customer, Phone, Payment, Sale, PayLite_engine, sessionmaker
+from sqlalchemy.orm import configure_mappers
+from datetime import datetime
+
+# Configure the mappers
+configure_mappers()
+
+# Create the engine and session
 
 Session = sessionmaker(bind=PayLite_engine)
 session = Session()
 
-def clear_screen():
-    os.system('cls' if os.name == 'nt' else 'clear')
+def main_menu():
+    while True:
+        print("Main Menu:")
+        print("1. Customer Menu")
+        print("2. Phone Menu")
+        print("3. Exit")
 
-def display_menu():
-    clear_screen()
-    print("Welcome to the PayLite System CLI!")
-    print("Please select an option:")
-    print("1. Customers")
-    print("2. Phones")
-    print("3. Payments")
-    print("4. Sales")
-    print("5. Exit")
-    choice = input("Enter your choice (1-5): ")
-    return choice
+        choice = input("Enter your choice (1-3): ")
+
+        if choice == "1":
+            customer_menu()
+        elif choice == "2":
+            phone_menu()
+        elif choice == "3":
+            print("Exiting PayLite system...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
 
 def customer_menu():
     while True:
-        clear_screen()
         print("Customer Menu:")
-        print("1. Create Customer")
-        print("2. Delete Customer")
-        print("3. View All Customers")
-        print("4. View Customer Sales")
-        print("5. Find Customer by National ID")
-        print("6. Back to Main Menu")
-        choice = input("Enter your choice (1-6): ")
+        print("1. Create a new customer")
+        print("2. View all customers")
+        print("3. Update a customer")
+        print("4. Delete a customer")
+        print("5. Exit")
+
+        choice = input("Enter your choice (1-5): ")
 
         if choice == "1":
             create_customer()
         elif choice == "2":
-            delete_customer()
+            view_customers()
         elif choice == "3":
-            view_all_customers()
+            update_customer()
         elif choice == "4":
-            view_customer_sales()
+            delete_customer()
         elif choice == "5":
-            find_customer_by_national_id()
-        elif choice == "6":
-            return
+            print("Byee...")
+            break
         else:
-            print("Invalid choice. Please try again.")
-            input("Press Enter to continue...")
+            print("Invalid choice. Jaribu tena!.")
 
 def create_customer():
-    clear_screen()
-    print("Create a new customer:")
-    name = input("Enter customer name: ")
-    national_id = int(input("Enter national ID: "))
-    credit_status = input("Enter credit status (Active, Completed, Ongoing): ")
-
-    if credit_status not in ['Active', 'Completed', 'Ongoing']:
-        print("Invalid credit status. Please try again.")
-        input("Press Enter to continue...")
-        return
+    print("Creating a new customer:")
+    name = input("Enter the name: ")
+    national_id = int(input("Enter the national ID: "))
+    credit_status = input("Enter the credit status (Active, Completed, Ongoing): ")
 
     customer = Customer(name=name, national_id=national_id, credit_status=credit_status)
     session.add(customer)
     session.commit()
-    print(f"Customer '{name}' created successfully.")
-    input("Press Enter to continue...")
+    print("Customer created successfully.")
+
+def view_customers():
+    customers = session.query(Customer).all()
+    if not customers:
+        print("No customers found.")
+    else:
+        print("All customers:")
+        for customer in customers:
+            print(f"ID: {customer.id}, Name: {customer.name}, National ID: {customer.national_id}, Credit Status: {customer.credit_status}")
+
+def update_customer():
+    view_customers()
+    customer_id = int(input("Enter the ID of the customer you want to update: "))
+    customer = session.query(Customer).get(customer_id)
+    if not customer:
+        print("Customer not found.")
+        return
+
+    name = input(f"Enter the new name (current: {customer.name}): ")
+    national_id = int(input(f"Enter the new national ID (current: {customer.national_id}): "))
+    credit_status = input(f"Enter the new credit status (current: {customer.credit_status}): ")
+
+    customer.name = name
+    customer.national_id = national_id
+    customer.credit_status = credit_status
+    session.commit()
+    print("Customer updated successfully.")
 
 def delete_customer():
-    clear_screen()
-    print("Delete a customer:")
-    national_id = int(input("Enter national ID of the customer to delete: "))
+    view_customers()
+    customer_id = int(input("Enter the ID of the customer you want to delete: "))
+    customer = session.query(Customer).get(customer_id)
+    if not customer:
+        print("Customer not found.")
+        return
 
-    customer = session.query(Customer).filter_by(national_id=national_id).first()
-    if customer:
-        session.delete(customer)
-        session.commit()
-        print(f"Customer '{customer.name}' deleted successfully.")
-    else:
-        print(f"No customer found with national ID {national_id}.")
-    input("Press Enter to continue...")
+    session.delete(customer)
+    session.commit()
+    print("Customer deleted successfully.")
 
-def view_all_customers():
-    clear_screen()
-    print("All Customers:")
-    customers = session.query(Customer).all()
-    for customer in customers:
-        print(f"Name: {customer.name}, National ID: {customer.national_id}, Credit Status: {customer.credit_status}")
-    input("Press Enter to continue...")
-
-def view_customer_sales():
-    clear_screen()
-    print("View Customer Sales:")
-    national_id = int(input("Enter national ID of the customer: "))
-    customer = session.query(Customer).filter_by(national_id=national_id).first()
-    if customer:
-        print(f"Customer: {customer.name}")
-        for sale in customer.sales:
-            print(f"Sale ID: {sale.id}, Total Price: {sale.total_price}, Deposit Paid: {sale.deposit_paid}, Balance Due: {sale.balance_due}, Installment Amount: {sale.installment_amount}, Status: {sale.status}")
-    else:
-        print(f"No customer found with national ID {national_id}.")
-    input("Press Enter to continue...")
-
-def find_customer_by_national_id():
-    clear_screen()
-    print("Find Customer by National ID:")
-    national_id = int(input("Enter national ID: "))
-    customer = session.query(Customer).filter_by(national_id=national_id).first()
-    if customer:
-        print(f"Name: {customer.name}, National ID: {customer.national_id}, Credit Status: {customer.credit_status}")
-    else:
-        print(f"No customer found with national ID {national_id}.")
-    input("Press Enter to continue...")
-
-def main():
+def phone_menu():
     while True:
-        choice = display_menu()
+        print("Phone Menu:")
+        print("1. Create a new phone")
+        print("2. View all phones")
+        print("3. Update a phone")
+        print("4. Delete a phone")
+        print("5. Exit")
+
+        choice = input("Enter your choice (1-5): ")
+
         if choice == "1":
-            customer_menu()
+            create_phone()
         elif choice == "2":
-            # Implement phone-related functionality
-            pass
+            view_phones()
         elif choice == "3":
-            # Implement payment-related functionality
-            pass
+            update_phone()
         elif choice == "4":
-            # Implement sale-related functionality
-            pass
+            delete_phone()
         elif choice == "5":
-            print("Exiting PayLite System CLI...")
+            print("Exiting phone menu...")
             break
         else:
             print("Invalid choice. Please try again.")
-            input("Press Enter to continue...")
+
+def create_phone():
+    print("Creating a new phone:")
+    brand = input("Enter the brand: ")
+    model = input("Enter the model: ")
+    price = int(input("Enter the price: "))
+    stock_quantity = int(input("Enter the stock quantity: "))
+
+    phone = Phone(brand=brand, model=model, price=price, stock_quantity=stock_quantity)
+    session.add(phone)
+    session.commit()
+    print("Phone created successfully.")
+
+def view_phones():
+    phones = session.query(Phone).all()
+    if not phones:
+        print("No phones found.")
+    else:
+        print("All phones:")
+        for phone in phones:
+            print(f"ID: {phone.id}, Brand: {phone.brand}, Model: {phone.model}, Price: {phone.price}, Stock: {phone.stock_quantity}")
+
+def update_phone():
+    view_phones()
+    phone_id = int(input("Enter the ID of the phone you want to update: "))
+    phone = session.query(Phone).get(phone_id)
+    if not phone:
+        print("Phone not found.")
+        return
+
+    brand = input(f"Enter the new brand (current: {phone.brand}): ")
+    model = input(f"Enter the new model (current: {phone.model}): ")
+    price = int(input(f"Enter the new price (current: {phone.price}): "))
+    stock_quantity = int(input(f"Enter the new stock quantity (current: {phone.stock_quantity}): "))
+
+    phone.brand = brand
+    phone.model = model
+    phone.price = price
+    phone.stock_quantity = stock_quantity
+    session.commit()
+    print("Phone updated successfully.")
+
+def delete_phone():
+    view_phones()
+    phone_id = int(input("Enter the ID of the phone you want to delete: "))
+    phone = session.query(Phone).get(phone_id)
+    if not phone:
+        print("Phone not found.")
+        return
+
+    session.delete(phone)
+    session.commit()
+    print("Phone deleted successfully.")
+
+def main():
+    main_menu()
 
 if __name__ == "__main__":
     main()
