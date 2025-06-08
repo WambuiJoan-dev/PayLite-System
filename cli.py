@@ -1,4 +1,4 @@
-from models import Base, Customer, Phone, Payment, Sale, PayLite_engine, sessionmaker
+from app.models import Base, Customer, Phone, Payment, Sale, PayLite_engine, sessionmaker
 from sqlalchemy.orm import configure_mappers
 from datetime import datetime
 

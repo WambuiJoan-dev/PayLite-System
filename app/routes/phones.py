@@ -1,40 +1,35 @@
-# app/routes/phones.py
 from flask import Blueprint, request, jsonify
 from app.models import Phone
 from app import db
+from app.schemas import PhoneSchema
 
 phone_bp = Blueprint('phones', __name__)
+phone_schema = PhoneSchema()
 
-# GET all phones
+
 @phone_bp.route('/', methods=['GET'])
 def get_phones():
     phones = Phone.query.all()
-    return jsonify([
-        {
-            "id": p.id,
-            "brand": p.brand,
-            "model": p.model,
-            "price": p.price,
-            "stock_quantity": p.stock_quantity
-        }
-        for p in phones
-    ])
+    return jsonify(phone_schema.dump(phones, many=True))
 
-# POST add new phone
+
+@phone_bp.route('/<int:phone_id>', methods=['GET'])
+def get_phone(phone_id):
+    phone = Phone.query.get(phone_id)
+    if not phone:
+        return jsonify({"error": "Phone not found."}), 404
+
+    return phone_schema.dump(phone)
+
 @phone_bp.route('/', methods=['POST'])
 def add_phone():
-    data = request.get_json()
-    phone = Phone(
-        brand=data.get('brand'),
-        model=data.get('model'),
-        price=data.get('price'),
-        stock_quantity=data.get('stock_quantity')
-    )
+    data = phone_schema.load(request.get_json())
+    phone = Phone(**data)
     db.session.add(phone)
     db.session.commit()
-    return jsonify({"message": "Phone added", "phone_id": phone.id}), 201
+    return phone_schema.dump(phone), 201
 
-# PUT update phone stock or price
+
 @phone_bp.route('/<int:phone_id>', methods=['PUT'])
 def update_phone(phone_id):
     phone = Phone.query.get(phone_id)
@@ -46,9 +41,9 @@ def update_phone(phone_id):
     phone.stock_quantity = data.get('stock_quantity', phone.stock_quantity)
 
     db.session.commit()
-    return jsonify({"message": "Phone updated", "phone_id": phone.id})
+    return phone_schema.dump(phone)
 
-# DELETE phone
+
 @phone_bp.route('/<int:phone_id>', methods=['DELETE'])
 def delete_phone(phone_id):
     phone = Phone.query.get(phone_id)
