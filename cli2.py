@@ -1,3 +1,0 @@
-import click
-
-@click.command()
