@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+#!/usr/bin/env python3
+
 from app.models import Customer, Phone, Payment, Sale, User
 from app.schemas import CustomerSchema, PhoneSchema, SaleSchema, PaymentSchema
 from app import create_app, db
@@ -35,8 +38,12 @@ def start():
         if choice == "1":
             current_user = login_user()
             if current_user:
-                print(f"\n✅ Logged in as '{current_user.username}' (Role: {current_user.role})")
-                main_menu()
+                print(f"\nLogged in as '{current_user.username}' (Role: {current_user.role})")
+                main_menu
+            #if current_user:
+                #print(f"\nLogged in as '{current_user.username}' (Role: {current_user.role})")
+                #main_menu()
+            
         elif choice == "2":
             create_user()
         elif choice == "3":
