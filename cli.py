@@ -1,25 +1,66 @@
-from app.models import Customer, Phone, Payment, Sale
+from app.models import Customer, Phone, Payment, Sale, User
 from app.schemas import CustomerSchema, PhoneSchema, SaleSchema, PaymentSchema
 from app import create_app, db
 from marshmallow import ValidationError
 from sqlalchemy.orm import configure_mappers
 from datetime import datetime, timedelta
 
-
 configure_mappers()
 
 application = create_app()
 application.app_context().push()
 
-
-
 session = db.session
 
-# Initialize schemas
 customer_schema = CustomerSchema()
 phone_schema = PhoneSchema()
 sale_schema = SaleSchema()
 payment_schema = PaymentSchema()
+
+current_user = None  
+
+
+
+def start():
+    global current_user
+
+    while True:
+        print("\nWelcome to PayLite!")
+        print("1. Login")
+        print("2. Create an account")
+        print("3. Exit")
+
+        choice = input("Enter your choice (1-3): ")
+
+        if choice == "1":
+            current_user = login_user()
+            if current_user:
+                print(f"\n✅ Logged in as '{current_user.username}' (Role: {current_user.role})")
+                main_menu()
+        elif choice == "2":
+            create_user()
+        elif choice == "3":
+            print("Exiting PayLite system...")
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def login_user():
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+
+    user = User.query.filter_by(username=username).first()
+    if not user:
+        print("User not found.")
+        return None
+
+    if user.check_password(password):
+        return user
+    else:
+        print("Invalid password.")
+        return None
+
+
 
 def main_menu():
     while True:
@@ -28,9 +69,10 @@ def main_menu():
         print("2. Phone Menu")
         print("3. Sales Menu")
         print("4. Payments Menu")
-        print("5. Exit")
+        print("5. User Menu")
+        print("6. Logout")
 
-        choice = input("Enter your choice (1-5): ")
+        choice = input("Enter your choice (1-6): ")
 
         if choice == "1":
             customer_menu()
@@ -41,10 +83,62 @@ def main_menu():
         elif choice == "4":
             payments_menu()
         elif choice == "5":
-            print("Exiting PayLite system...")
+            user_menu()
+        elif choice == "6":
+            print(f"Logging out '{current_user.username}'...")
             break
         else:
             print("Invalid choice. Please try again.")
+
+
+
+def user_menu():
+    while True:
+        print("\nUser Menu:")
+        print("1. Create a new user")
+        print("2. View all users")
+        print("3. Exit")
+
+        choice = input("Enter your choice (1-3): ")
+
+        if choice == "1":
+            create_user()
+        elif choice == "2":
+            view_users()
+        elif choice == "3":
+            break
+        else:
+            print("Invalid choice. Please try again.")
+
+def create_user():
+    print("\nCreating a new user:")
+    username = input("Enter username: ")
+    password = input("Enter password: ")
+    role = input("Enter role (admin/user): ").strip().lower()
+
+    if role not in ["admin", "user"]:
+        print("Invalid role. Must be 'admin' or 'user'.")
+        return
+
+    existing_user = User.query.filter_by(username=username).first()
+    if existing_user:
+        print("User already exists.")
+        return
+
+    user = User(username=username, role=role)
+    user.set_password(password)
+    session.add(user)
+    session.commit()
+    print(f"User '{username}' created successfully with role '{role}'.")
+
+def view_users():
+    users = User.query.all()
+    if not users:
+        print("No users found.")
+    else:
+        print("All users:")
+        for user in users:
+            print(f"ID: {user.id}, Username: {user.username}, Role: {user.role}")
 
 
 
@@ -133,6 +227,10 @@ def update_customer():
         print(err.messages)
 
 def delete_customer():
+    if current_user.role != "admin":
+        print("Only admins can delete payments.")
+        return
+
     view_customers()
     customer_id = int(input("Enter the ID of the customer you want to delete: "))
     customer = Customer.query.get(customer_id)
@@ -142,9 +240,7 @@ def delete_customer():
 
     session.delete(customer)
     session.commit()
-    print("Customer deleted successfully.")
-
-
+    print("✅ Customer deleted successfully.")
 
 def phone_menu():
     while True:
@@ -236,6 +332,10 @@ def update_phone():
         print(err.messages)
 
 def delete_phone():
+    if current_user.role != "admin":
+        print("Only admins can delete payments.")
+        return
+
     view_phones()
     phone_id = int(input("Enter the ID of the phone you want to delete: "))
     phone = Phone.query.get(phone_id)
@@ -363,10 +463,8 @@ def record_payment():
         print("Error recording payment:")
         print(err.messages)
 
-
-
 def main():
-    main_menu()
+    start()
 
 if __name__ == "__main__":
     main()

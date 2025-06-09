@@ -3,6 +3,7 @@ from flask_jwt_extended import create_access_token
 from app.models import User
 from app import db
 from marshmallow import Schema, fields, validate, ValidationError
+from app.schemas import LoginSchema
 
 auth_bp = Blueprint('auth', __name__)
 login_schema = LoginSchema()
