@@ -1,4 +1,3 @@
-# app/routes/sales.py
 from flask import Blueprint, request, jsonify
 from app.models import Sale, Customer, Phone
 from app import db
