@@ -3,18 +3,22 @@ from app.models import Payment, Sale
 from app import db
 from app.schemas import PaymentSchema
 from datetime import datetime, timedelta
+from flask_jwt_extended import jwt_required
+from app.decorators import role_required
 
 payment_bp = Blueprint('payments', __name__)
 payment_schema = PaymentSchema()
 
 
 @payment_bp.route('/', methods=['GET'])
+@jwt_required()
 def get_payments():
     payments = Payment.query.all()
     return jsonify(payment_schema.dump(payments, many=True))
 
 
 @payment_bp.route('/<int:payment_id>', methods=['GET'])
+@jwt_required()
 def get_payment(payment_id):
     payment = Payment.query.get(payment_id)
     if not payment:
@@ -24,12 +28,14 @@ def get_payment(payment_id):
 
 
 @payment_bp.route('/sale/<int:sale_id>', methods=['GET'])
+@jwt_required()
 def get_payments_for_sale(sale_id):
     payments = Payment.query.filter_by(sale_id=sale_id).all()
     return jsonify(payment_schema.dump(payments, many=True))
 
 
 @payment_bp.route('/', methods=['POST'])
+@jwt_required()
 def record_payment():
     data = payment_schema.load(request.get_json())
     sale = Sale.query.get(data['sale_id'])
@@ -56,6 +62,7 @@ def record_payment():
 
 
 @payment_bp.route('/<int:payment_id>', methods=['DELETE'])
+@role_required('admin')
 def delete_payment(payment_id):
     payment = Payment.query.get(payment_id)
     if not payment:

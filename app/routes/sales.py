@@ -3,18 +3,22 @@ from flask import Blueprint, request, jsonify
 from app.models import Sale, Customer, Phone
 from app import db
 from app.schemas import SaleSchema
+from flask_jwt_extended  import jwt_required
+from app.decorators import role_required
 
 sale_bp = Blueprint('sales', __name__)
 sale_schema = SaleSchema()
 
 
 @sale_bp.route('/', methods=['GET'])
+@jwt_required()
 def get_sales():
     sales = Sale.query.all()
     return jsonify(sale_schema.dump(sales, many=True))
 
 
 @sale_bp.route('/<int:sale_id>', methods=['GET'])
+@jwt_required()
 def get_sale(sale_id):
     sale = Sale.query.get(sale_id)
     if not sale:
@@ -24,6 +28,7 @@ def get_sale(sale_id):
 
 
 @sale_bp.route('/', methods=['POST'])
+@jwt_required()
 def create_sale():
     data = sale_schema.load(request.get_json())
     customer = Customer.query.get(data['customer_id'])
@@ -58,6 +63,7 @@ def create_sale():
 
 
 @sale_bp.route('/<int:sale_id>', methods=['PUT'])
+@jwt_required()
 def update_sale(sale_id):
     sale = Sale.query.get(sale_id)
     if not sale:
@@ -72,6 +78,7 @@ def update_sale(sale_id):
 
 
 @sale_bp.route('/<int:sale_id>', methods=['DELETE'])
+@role_required('admin')
 def delete_sale(sale_id):
     sale = Sale.query.get(sale_id)
     if not sale:
