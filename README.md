@@ -1,9 +1,11 @@
 PayLite Backend System
+
 A backend system for managing "Lipa Mdogo Mdogo" (installment-based mobile phone sales).
 Built with Flask, SQLAlchemy, Marshmallow, CLI support.
-Demonstrates backend architecture best practices.
+
 
 📌 Project Summary
+
 PayLite is a backend system designed for shops selling mobile phones on credit.
 It tracks customers, phones, sales on installment, payments, and balances.
 
@@ -45,7 +47,7 @@ Clone the repo:
 bash
 Copy
 Edit
-git clone https://github.com/your-username/paylite-backend.git
+git clone https://github.com/WambuiJoan-dev/PayLite-System.git
 cd paylite-backend
 Create virtualenv and install dependencies:
 bash
