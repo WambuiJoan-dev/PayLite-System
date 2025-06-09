@@ -1,4 +1,3 @@
-# app/routes/payments.py
 from flask import Blueprint, request, jsonify
 from app.models import Payment, Sale
 from app import db

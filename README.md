@@ -163,5 +163,5 @@ Developed to demonstrate backend architecture, data modeling, API design, testin
 ## 👤 Author
 
 **Joan Wambui**  
-Backend Developer  
+Software Engineer  
 [GitHub Profile](https://github.com/WambuiJoan-dev)
