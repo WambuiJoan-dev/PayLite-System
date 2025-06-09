@@ -1,5 +1,3 @@
-✅ Excellent — here is your ready-to-use professional README.md template for PayLite → just copy this into PayLite-System/README.md and fill in where needed:
-
 PayLite Backend System
 A backend system for managing "Lipa Mdogo Mdogo" (installment-based mobile phone sales).
 Built with Flask, SQLAlchemy, Marshmallow, CLI support.
