@@ -22,6 +22,23 @@ payment_schema = PaymentSchema()
 
 current_user = None  
 
+# --- NEW FUNCTION TO INITIALIZE DATABASE ---
+def initialize_database():
+    """
+    Creates all database tables based on SQLAlchemy models.
+    This should be run once when setting up the database for the first time.
+    """
+    print("\nInitializing database tables...")
+    try:
+        # Ensure operations are within the application context
+        with application.app_context(): 
+            db.create_all()
+        print("✅ Database tables created successfully!")
+        print("You can now create users and other data.")
+    except Exception as e:
+        print(f"❌ Error initializing database: {e}")
+        print("Please ensure your database configuration is correct and you have write permissions.")
+# --- END NEW FUNCTION ---
 
 
 def start():
@@ -29,20 +46,20 @@ def start():
 
     while True:
         print("\nWelcome to PayLite!")
+        print("0. Initialize Database (Run this once if tables are missing!)") # New option for database setup
         print("1. Login")
         print("2. Create an account")
         print("3. Exit")
 
-        choice = input("Enter your choice (1-3): ")
+        choice = input("Enter your choice (0-3): ") # Updated prompt for new option
 
-        if choice == "1":
+        if choice == "0":
+            initialize_database()
+        elif choice == "1":
             current_user = login_user()
             if current_user:
                 print(f"\nLogged in as '{current_user.username}' (Role: {current_user.role})")
-                main_menu
-            #if current_user:
-                #print(f"\nLogged in as '{current_user.username}' (Role: {current_user.role})")
-                #main_menu()
+                main_menu() # FIXED: Call main_menu as a function
             
         elif choice == "2":
             create_user()
@@ -378,7 +395,6 @@ def create_sale():
     print("\nCreating a new sale:")
     view_customers()
     customer_id = input("Enter customer ID: ")
-    view_phones()
     phone_id = input("Enter phone ID: ")
     deposit_paid = input("Enter deposit paid: ")
     installment_amount = input("Enter installment amount: ")
