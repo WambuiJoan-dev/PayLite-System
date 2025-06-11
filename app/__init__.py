@@ -5,7 +5,8 @@ from flask_migrate import Migrate
 #from flask_cors import CORS
  
 db = SQLAlchemy()
-jwt = JWTManager()  
+jwt = JWTManager() 
+migrate = Migrate() 
 
 def create_app():
     application = Flask(__name__)
@@ -14,7 +15,7 @@ def create_app():
     
     db.init_app(application)
     jwt.init_app(application)  
-    #migrate = Migrate()
+    migrate.init_app(application, db)
     #CORS(application, origins=["http://localhost:3000"])  
     
     import app.models  
