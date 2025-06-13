@@ -2,7 +2,7 @@
 
 BASE_URL="http://localhost:5000"
 ADMIN_USERNAME="Martin"
-ADMIN_PASSWORD="Wambua"
+ADMIN_PASSWORD="Martin@1"
 
 TOKEN=$(curl -s -X POST $BASE_URL/auth/login \
   -H "Content-Type: application/json" \
@@ -15,19 +15,11 @@ fi
 
 echo "✅ Login OK. Token acquired."
 
-curl -s -X GET $BASE_URL/customers/ \
+echo "➡️ GET /sales/"
+curl -s -X GET $BASE_URL/sales/ \
   -H "Authorization: Bearer $TOKEN" | jq
 
-curl -s -X POST $BASE_URL/phones/ \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "brand": "Techno",
-    "model": "Camon 18",
-    "price": 18000,
-    "stock_quantity": 35
-  }' | jq
-
+echo "➡️ POST /sales/"
 curl -s -X POST $BASE_URL/sales/ \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
@@ -38,15 +30,8 @@ curl -s -X POST $BASE_URL/sales/ \
     "installment_amount": 2000
   }' | jq
 
-curl -s -X POST $BASE_URL/payments/ \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "amount_paid": 3000,
-    "sale_id": 4
-  }' | jq
-
-curl -s -X DELETE $BASE_URL/customers/12 \
+echo "➡️ GET /sales/1"
+curl -s -X GET $BASE_URL/sales/1 \
   -H "Authorization: Bearer $TOKEN" | jq
 
-echo "✅ CURL TEST COMPLETED"
+echo "✅ SALES TEST COMPLETED"

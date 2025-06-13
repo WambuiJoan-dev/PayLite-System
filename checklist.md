@@ -52,7 +52,7 @@ PayLite Backend Project - Progress Checklist
 
  How to run CLI
 
- Example API calls
+ Example API calls# First login as admin
 
  Example CLI screenshots
 
