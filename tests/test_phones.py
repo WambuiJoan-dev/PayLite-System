@@ -2,8 +2,8 @@
 
 def get_access_token(test_client):
     response = test_client.post('/auth/login', json={
-        "username": "Martin",
-        "password": "Wambua"
+        "username": "Jedidah",
+        "password": "Jeddy@1"
     })
     data = response.get_json()
     return data["access_token"]
