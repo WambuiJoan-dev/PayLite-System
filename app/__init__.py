@@ -2,24 +2,27 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
-#from flask_cors import CORS
+# from flask_cors import CORS
  
 db = SQLAlchemy()
 jwt = JWTManager() 
 migrate = Migrate() 
 
-def create_app():
+def create_app(config_class=None):
     application = Flask(__name__)
-    application.config.from_object('app.config.Config')
     
+    if config_class is None:
+        from app.config import Config
+        config_class = Config
+    
+    application.config.from_object(config_class)
     
     db.init_app(application)
     jwt.init_app(application)  
     migrate.init_app(application, db)
-    #CORS(application, origins=["http://localhost:3000"])  
+    # CORS(application, origins=["http://localhost:3000"])  
     
     import app.models  
-    
     
     from app.routes.customers import customer_bp
     from app.routes.phones import phone_bp
