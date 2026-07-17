@@ -5,6 +5,7 @@ from app.models import Customer, Phone, Payment, Sale, User
 from app.schemas import CustomerSchema, PhoneSchema, SaleSchema, PaymentSchema
 from app import create_app, db
 from marshmallow import ValidationError
+from getpass import getpass
 from sqlalchemy.orm import configure_mappers
 from datetime import datetime, timedelta
 
@@ -50,6 +51,7 @@ def start():
 def login_user():
     username = input("Enter username: ")
     password = input("Enter password: ")
+    password = getpass("Enter password: ")
 
     user = User.query.filter_by(username=username).first()
     if not user:
@@ -116,6 +118,7 @@ def create_user():
     print("\nCreating a new user:")
     username = input("Enter username: ")
     password = input("Enter password: ")
+    password = getpass("Enter password: ")
     role = input("Enter role (admin/user): ").strip().lower()
 
     if role not in ["admin", "user"]:
@@ -201,8 +204,12 @@ def view_customers():
 
 def update_customer():
     view_customers()
-    customer_id = int(input("Enter the ID of the customer you want to update: "))
-    customer = Customer.query.get(customer_id)
+    try:
+        customer_id = int(input("Enter the ID of the customer you want to update: "))
+        customer = Customer.query.get(customer_id)
+    except (ValueError, TypeError):
+        print("Invalid ID. Please enter a number.")
+        return
     if not customer:
         print("Customer not found.")
         return
@@ -230,12 +237,16 @@ def update_customer():
 
 def delete_customer():
     if current_user.role != "admin":
-        print("Only admins can delete payments.")
+        print("Only admins can delete customers.")
         return
 
     view_customers()
-    customer_id = int(input("Enter the ID of the customer you want to delete: "))
-    customer = Customer.query.get(customer_id)
+    try:
+        customer_id = int(input("Enter the ID of the customer you want to delete: "))
+        customer = Customer.query.get(customer_id)
+    except (ValueError, TypeError):
+        print("Invalid ID. Please enter a number.")
+        return
     if not customer:
         print("Customer not found.")
         return
@@ -303,8 +314,12 @@ def view_phones():
 
 def update_phone():
     view_phones()
-    phone_id = int(input("Enter the ID of the phone you want to update: "))
-    phone = Phone.query.get(phone_id)
+    try:
+        phone_id = int(input("Enter the ID of the phone you want to update: "))
+        phone = Phone.query.get(phone_id)
+    except (ValueError, TypeError):
+        print("Invalid ID. Please enter a number.")
+        return
     if not phone:
         print("Phone not found.")
         return
@@ -335,12 +350,16 @@ def update_phone():
 
 def delete_phone():
     if current_user.role != "admin":
-        print("Only admins can delete payments.")
+        print("Only admins can delete phones.")
         return
 
     view_phones()
-    phone_id = int(input("Enter the ID of the phone you want to delete: "))
-    phone = Phone.query.get(phone_id)
+    try:
+        phone_id = int(input("Enter the ID of the phone you want to delete: "))
+        phone = Phone.query.get(phone_id)
+    except (ValueError, TypeError):
+        print("Invalid ID. Please enter a number.")
+        return
     if not phone:
         print("Phone not found.")
         return
@@ -376,14 +395,28 @@ def create_sale():
     phone_id = input("Enter phone ID: ")
     deposit_paid = input("Enter deposit paid: ")
     installment_amount = input("Enter installment amount: ")
+    try:
+        customer_id = int(input("Enter customer ID: "))
+        phone_id = int(input("Enter phone ID: "))
+        deposit_paid = int(input("Enter deposit paid: "))
+        installment_amount = int(input("Enter installment amount: "))
+    except ValueError:
+        print("Invalid input. Please enter numbers for IDs and amounts.")
+        return
 
     phone = Phone.query.get(phone_id)
     if not phone:
         print("Invalid phone selected.")
         return
 
+    # Add a check to ensure the phone is in stock before selling
+    if phone.stock_quantity <= 0:
+        print(f"Error: Phone '{phone.brand} {phone.model}' is out of stock.")
+        return
+
     total_price = phone.price
     balance_due = total_price - int(deposit_paid)
+    balance_due = total_price - deposit_paid
 
     sale_data = {
         "total_price": total_price,
